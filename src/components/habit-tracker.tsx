@@ -67,7 +67,6 @@ export function HabitTracker() {
     let streak = 0;
     let checkDay = startOfToday();
     
-    // If today hasn't been logged, start checking from yesterday
     if (climbs[format(checkDay, 'yyyy-MM-dd')] === undefined) {
         checkDay = subDays(checkDay, 1);
     }
@@ -81,12 +80,19 @@ export function HabitTracker() {
   }, [climbs]);
 
   function CustomDay(props: DayProps) {
-    if (!isValid(props.date)) {
-        return <div role="gridcell"></div>;
+    const { date, displayMonth } = props;
+    if (!date) {
+        return <td role="gridcell"></td>;
     }
-    const dateKey = format(props.date, "yyyy-MM-dd");
+    const isOutside = date.getMonth() !== displayMonth.getMonth();
+
+    if (isOutside) {
+      return <td role="gridcell"></td>;
+    }
+    
+    const dateKey = format(date, "yyyy-MM-dd");
     const climbed = climbs[dateKey];
-    const isPast = isBefore(props.date, startOfToday());
+    const isPast = isBefore(date, startOfToday());
 
     let indicator = null;
     if (climbed === true) {
@@ -94,12 +100,22 @@ export function HabitTracker() {
     } else if (climbed === false || (isPast && climbed === undefined)) {
       indicator = <X className="absolute bottom-1 left-1/2 -translate-x-1/2 h-4 w-4 text-destructive" />;
     }
-
+    
     return (
-      <div className="relative h-full w-full flex items-center justify-center">
-        <span>{format(props.date, "d")}</span>
-        {indicator}
-      </div>
+      <td role="gridcell" className="relative h-full w-full flex items-center justify-center">
+        <button
+            className="relative h-12 w-12 sm:h-14 sm:w-14 text-base rounded-md focus:bg-accent/50 focus:outline-none focus:ring-1 focus:ring-ring"
+            onClick={() => {
+                if (date && !isAfter(date, startOfToday())) {
+                    setSelectedDate(date);
+                }
+            }}
+            disabled={isAfter(date, startOfToday())}
+            >
+            <span>{format(date, "d")}</span>
+            {indicator}
+        </button>
+      </td>
     );
   }
   
@@ -124,12 +140,6 @@ export function HabitTracker() {
             <Card className="shadow-xl border-border/50">
                 <CardContent className="flex justify-center p-1 sm:p-2">
                      <DayPicker
-                        onDayClick={(day) => {
-                            if (day && !isAfter(day, startOfToday())) {
-                                setSelectedDate(day);
-                            }
-                        }}
-                        disabled={(date) => isAfter(date, startOfToday())}
                         components={{
                             Day: CustomDay 
                         }}
@@ -178,3 +188,5 @@ export function HabitTracker() {
     </div>
   );
 }
+
+  
