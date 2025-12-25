@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { format, startOfToday, isBefore, isAfter, subDays } from "date-fns";
-import { Mountain, Frown, TrendingUp, Award } from "lucide-react";
+import { Mountain, Frown, TrendingUp, Award, Minus, Check } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, type CalendarProps } from "@/components/ui/calendar";
@@ -84,17 +84,17 @@ export function HabitTracker() {
     const climbed = climbs[dateKey];
     const isPast = isBefore(date, startOfToday());
     
-    let icon = null;
+    let indicator = null;
     if (climbed === true) {
-      icon = <Mountain className="h-5 w-5 text-primary" />;
+      indicator = <div className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-primary" />;
     } else if ((isPast && climbed === undefined) || climbed === false) {
-      icon = <Frown className="h-5 w-5 text-muted-foreground" />;
+      indicator = <div className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-destructive" />;
     }
     
     return (
         <div className="relative h-full w-full flex items-center justify-center">
             {date.getDate()}
-            {icon && <div className="absolute inset-0 flex items-center justify-center opacity-30 -z-10">{icon}</div>}
+            {indicator}
         </div>
     );
   };
@@ -154,14 +154,14 @@ export function HabitTracker() {
                                 onClick={() => handleUpdateClimb(selectedDate, true)}
                                 className="w-full"
                             >
-                                <Mountain className="mr-2 h-4 w-4" /> Yes, we climbed!
+                                <Check className="mr-2 h-4 w-4" /> Yes, we climbed!
                             </Button>
                             <Button
                                 variant="secondary"
                                 onClick={() => handleUpdateClimb(selectedDate, false)}
                                 className="w-full"
                             >
-                                <Frown className="mr-2 h-4 w-4" /> No, not this time.
+                                <Minus className="mr-2 h-4 w-4" /> No, not this time.
                             </Button>
                         </DialogFooter>
                     </DialogContent>
