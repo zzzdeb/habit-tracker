@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { format, startOfToday, isBefore, isAfter, subDays } from "date-fns";
-import { Mountain, Frown, TrendingUp, Award, Minus, Check } from "lucide-react";
+import { Mountain, Frown, TrendingUp, Award, Minus, Check, X } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, type CalendarProps } from "@/components/ui/calendar";
@@ -86,14 +86,14 @@ export function HabitTracker() {
     
     let indicator = null;
     if (climbed === true) {
-      indicator = <div className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-primary" />;
+      indicator = <Check className="absolute bottom-1 left-1/2 -translate-x-1/2 h-4 w-4 text-primary" />;
     } else if ((isPast && climbed === undefined) || climbed === false) {
-      indicator = <div className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-destructive" />;
+      indicator = <X className="absolute bottom-1 left-1/2 -translate-x-1/2 h-4 w-4 text-destructive" />;
     }
     
     return (
         <div className="relative h-full w-full flex items-center justify-center">
-            {date.getDate()}
+            <span className="mb-2">{date.getDate()}</span>
             {indicator}
         </div>
     );
@@ -161,7 +161,7 @@ export function HabitTracker() {
                                 onClick={() => handleUpdateClimb(selectedDate, false)}
                                 className="w-full"
                             >
-                                <Minus className="mr-2 h-4 w-4" /> No, not this time.
+                                <X className="mr-2 h-4 w-4" /> No, not this time.
                             </Button>
                         </DialogFooter>
                     </DialogContent>
