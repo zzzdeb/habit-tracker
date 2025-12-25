@@ -3,9 +3,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { format, startOfToday, isBefore, isAfter, subDays } from "date-fns";
 import { TrendingUp, Award, Check, X } from "lucide-react";
+import { DayContent, DayPicker } from "react-day-picker";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, type CalendarProps } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -79,7 +79,8 @@ export function HabitTracker() {
     return { totalClimbs, currentStreak: streak };
   }, [climbs]);
 
-  const CustomDayContent: CalendarProps['components']['DayContent'] = ({ date, ...props }) => {
+  const CustomDayContent = (props: React.ComponentProps<typeof DayContent>) => {
+    const { date } = props;
     const dateKey = format(date, "yyyy-MM-dd");
     const climbed = climbs[dateKey];
     const isPast = isBefore(date, startOfToday());
@@ -119,7 +120,7 @@ export function HabitTracker() {
 
             <Card className="shadow-xl border-border/50">
                 <CardContent className="p-1 sm:p-2">
-                     <Calendar
+                     <DayPicker
                         onDayClick={(day) => {
                             if (day && !isAfter(day, startOfToday())) {
                                 setSelectedDate(day);
@@ -129,6 +130,7 @@ export function HabitTracker() {
                         components={{ DayContent: CustomDayContent }}
                         className="w-full"
                         classNames={{
+                            day_outside: 'text-muted-foreground/50',
                             day_content: "h-12 w-12 sm:h-14 sm:w-14 text-base rounded-md focus:bg-accent/50",
                             day: "h-12 w-12 sm:h-14 sm:w-14 text-base rounded-md focus:bg-accent/50",
                             day_selected: "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
