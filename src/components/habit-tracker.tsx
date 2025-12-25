@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { format, startOfToday, isBefore, isAfter, subDays } from "date-fns";
-import { Mountain, Frown, TrendingUp, Award, Minus, Check, X } from "lucide-react";
+import { TrendingUp, Award, Check, X } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, type CalendarProps } from "@/components/ui/calendar";
@@ -79,7 +79,7 @@ export function HabitTracker() {
     return { totalClimbs, currentStreak: streak };
   }, [climbs]);
 
-  const CustomDayContent: CalendarProps['components']['DayContent'] = ({ date }) => {
+  const CustomDayContent: CalendarProps['components']['DayContent'] = ({ date, ...props }) => {
     const dateKey = format(date, "yyyy-MM-dd");
     const climbed = climbs[dateKey];
     const isPast = isBefore(date, startOfToday());
@@ -87,13 +87,13 @@ export function HabitTracker() {
     let indicator = null;
     if (climbed === true) {
       indicator = <Check className="absolute bottom-1 left-1/2 -translate-x-1/2 h-4 w-4 text-primary" />;
-    } else if ((isPast && climbed === undefined) || climbed === false) {
+    } else if (climbed === false || (isPast && climbed === undefined)) {
       indicator = <X className="absolute bottom-1 left-1/2 -translate-x-1/2 h-4 w-4 text-destructive" />;
     }
     
     return (
         <div className="relative h-full w-full flex items-center justify-center">
-            <span className="mb-2">{date.getDate()}</span>
+            <span>{format(date, "d")}</span>
             {indicator}
         </div>
     );
@@ -129,6 +129,7 @@ export function HabitTracker() {
                         components={{ DayContent: CustomDayContent }}
                         className="w-full"
                         classNames={{
+                            day_content: "h-12 w-12 sm:h-14 sm:w-14 text-base rounded-md focus:bg-accent/50",
                             day: "h-12 w-12 sm:h-14 sm:w-14 text-base rounded-md focus:bg-accent/50",
                             day_selected: "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
                             day_today: "bg-primary/10 text-primary ring-1 ring-primary",
