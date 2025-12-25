@@ -1,11 +1,11 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { format, startOfToday, isBefore, isAfter, subDays } from "date-fns";
-import { TrendingUp, Award, Check, X } from "lucide-react";
-import { DayContent, DayPicker } from "react-day-picker";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { format, startOfToday, isBefore, isAfter, subDays, isValid } from "date-fns";
+import { TrendingUp, Award, Check, X, Mountain, ThumbsDown } from "lucide-react";
+import { DayPicker, DayProps } from "react-day-picker";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type ClimbData = Record<string, boolean>;
 
@@ -67,7 +67,8 @@ export function HabitTracker() {
     let streak = 0;
     let checkDay = startOfToday();
     
-    if (!climbs.hasOwnProperty(format(checkDay, 'yyyy-MM-dd'))) {
+    // If today hasn't been logged, start checking from yesterday
+    if (climbs[format(checkDay, 'yyyy-MM-dd')] === undefined) {
         checkDay = subDays(checkDay, 1);
     }
     
@@ -79,26 +80,28 @@ export function HabitTracker() {
     return { totalClimbs, currentStreak: streak };
   }, [climbs]);
 
-  const CustomDayContent = (props: React.ComponentProps<typeof DayContent>) => {
-    const { date } = props;
-    const dateKey = format(date, "yyyy-MM-dd");
+  function CustomDay(props: DayProps) {
+    if (!isValid(props.date)) {
+        return <div role="gridcell"></div>;
+    }
+    const dateKey = format(props.date, "yyyy-MM-dd");
     const climbed = climbs[dateKey];
-    const isPast = isBefore(date, startOfToday());
-    
+    const isPast = isBefore(props.date, startOfToday());
+
     let indicator = null;
     if (climbed === true) {
       indicator = <Check className="absolute bottom-1 left-1/2 -translate-x-1/2 h-4 w-4 text-primary" />;
     } else if (climbed === false || (isPast && climbed === undefined)) {
       indicator = <X className="absolute bottom-1 left-1/2 -translate-x-1/2 h-4 w-4 text-destructive" />;
     }
-    
+
     return (
-        <div className="relative h-full w-full flex items-center justify-center">
-            <span>{format(date, "d")}</span>
-            {indicator}
-        </div>
+      <div className="relative h-full w-full flex items-center justify-center">
+        <span>{format(props.date, "d")}</span>
+        {indicator}
+      </div>
     );
-  };
+  }
   
   return (
     <div className="min-h-screen bg-background text-foreground font-body">
@@ -119,7 +122,7 @@ export function HabitTracker() {
             </div>
 
             <Card className="shadow-xl border-border/50">
-                <CardContent className="p-1 sm:p-2">
+                <CardContent className="flex justify-center p-1 sm:p-2">
                      <DayPicker
                         onDayClick={(day) => {
                             if (day && !isAfter(day, startOfToday())) {
@@ -127,17 +130,17 @@ export function HabitTracker() {
                             }
                         }}
                         disabled={(date) => isAfter(date, startOfToday())}
-                        components={{ DayContent: CustomDayContent }}
+                        components={{
+                            Day: CustomDay 
+                        }}
                         className="w-full"
                         classNames={{
                             day_outside: 'text-muted-foreground/50',
-                            day_content: "h-12 w-12 sm:h-14 sm:w-14 text-base rounded-md focus:bg-accent/50",
-                            day: "h-12 w-12 sm:h-14 sm:w-14 text-base rounded-md focus:bg-accent/50",
-                            day_selected: "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
                             day_today: "bg-primary/10 text-primary ring-1 ring-primary",
                             head_cell: "w-12 sm:w-14",
                             caption_label: "font-headline text-lg",
                             nav_button: "h-8 w-8",
+                            day: "h-12 w-12 sm:h-14 sm:w-14 text-base rounded-md focus:bg-accent/50 focus:outline-none focus:ring-1 focus:ring-ring",
                         }}
                      />
                 </CardContent>
@@ -157,14 +160,14 @@ export function HabitTracker() {
                                 onClick={() => handleUpdateClimb(selectedDate, true)}
                                 className="w-full"
                             >
-                                <Check className="mr-2 h-4 w-4" /> Yes, we climbed!
+                                <Mountain className="mr-2 h-4 w-4" /> Yes, we climbed!
                             </Button>
                             <Button
                                 variant="secondary"
                                 onClick={() => handleUpdateClimb(selectedDate, false)}
                                 className="w-full"
                             >
-                                <X className="mr-2 h-4 w-4" /> No, not this time.
+                                <ThumbsDown className="mr-2 h-4 w-4" /> No, not this time.
                             </Button>
                         </DialogFooter>
                     </DialogContent>
