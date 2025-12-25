@@ -81,7 +81,7 @@ export function HabitTracker() {
 
   function CustomDay(props: DayProps) {
     const { date, displayMonth } = props;
-    if (!date) {
+    if (!date || !displayMonth) {
         return <td role="gridcell"></td>;
     }
     const isOutside = date.getMonth() !== displayMonth.getMonth();
