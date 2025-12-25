@@ -16,8 +16,21 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+/**
+ * @typedef {Record<string, boolean>} ClimbData
+ * A record of climb statuses, where the key is the date string "yyyy-MM-dd"
+ * and the value is a boolean indicating if a climb was completed.
+ */
 type ClimbData = Record<string, boolean>;
 
+/**
+ * A card component to display a single statistic.
+ * @param {object} props - The component props.
+ * @param {string} props.title - The title of the stat card.
+ * @param {string | number} props.value - The value to be displayed.
+ * @param {string} props.caption - A descriptive caption for the value.
+ * @param {React.ElementType} props.icon - The icon component to display.
+ */
 function StatCard({ title, value, caption, icon: Icon }: { title: string; value: string | number; caption: string; icon: React.ElementType }) {
     return (
         <Card>
@@ -33,10 +46,18 @@ function StatCard({ title, value, caption, icon: Icon }: { title: string; value:
     );
 }
 
+/**
+ * HabitTracker is the main component for tracking daily "climbs".
+ * It displays a calendar for logging daily progress, statistics for the current
+ * streak and total climbs, and uses localStorage to persist data.
+ */
 export function HabitTracker() {
+  // State for storing climb data, keyed by date.
   const [climbs, setClimbs] = useState<ClimbData>({});
+  // State for the currently selected date in the calendar.
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
+  // Load climb data from localStorage on initial component mount.
   useEffect(() => {
     try {
       const savedClimbs = localStorage.getItem("peak-progress-climbs");
@@ -48,6 +69,7 @@ export function HabitTracker() {
     }
   }, []);
 
+  // Save climb data to localStorage whenever it changes.
   useEffect(() => {
     try {
       localStorage.setItem("peak-progress-climbs", JSON.stringify(climbs));
@@ -56,21 +78,29 @@ export function HabitTracker() {
     }
   }, [climbs]);
 
+  /**
+   * Updates the climb status for a given date.
+   * @param {Date} date - The date to update.
+   * @param {boolean} climbed - The new climb status.
+   */
   const handleUpdateClimb = (date: Date, climbed: boolean) => {
     const dateKey = format(date, "yyyy-MM-dd");
     setClimbs((prev) => ({ ...prev, [dateKey]: climbed }));
     setSelectedDate(null);
   };
   
+  // Memoized calculation for total climbs and current streak.
   const { totalClimbs, currentStreak } = useMemo(() => {
     const totalClimbs = Object.values(climbs).filter(Boolean).length;
     let streak = 0;
     let checkDay = startOfToday();
     
+    // If today hasn't been logged, start streak check from yesterday.
     if (climbs[format(checkDay, 'yyyy-MM-dd')] === undefined) {
         checkDay = subDays(checkDay, 1);
     }
     
+    // Iterate backwards to calculate the current streak.
     while(climbs[format(checkDay, 'yyyy-MM-dd')] === true) {
         streak++;
         checkDay = subDays(checkDay, 1);
@@ -79,8 +109,14 @@ export function HabitTracker() {
     return { totalClimbs, currentStreak: streak };
   }, [climbs]);
 
+  /**
+   * Custom renderer for each day in the DayPicker calendar.
+   * It displays indicators for climbed or missed days.
+   * @param {DayProps} props - Props provided by DayPicker for each day.
+   */
   function CustomDay(props: DayProps) {
     const { date, displayMonth } = props;
+    
     if (!date || !displayMonth) {
         return <td role="gridcell"></td>;
     }
@@ -188,5 +224,3 @@ export function HabitTracker() {
     </div>
   );
 }
-
-  
